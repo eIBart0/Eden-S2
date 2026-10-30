@@ -149,7 +149,10 @@ VkBufferView Buffer::View(u32 offset, u32 size, VideoCore::Surface::PixelFormat 
             .pNext = nullptr,
             .flags = 0,
             .buffer = *buffer,
-            .format = MaxwellToVK::SurfaceFormat(*device, FormatType::Buffer, false, format).format,
+            .format = MaxwellToVK::SurfaceFormat(*device, FormatType::Buffer, false,
+                                                 format == VideoCore::Surface::PixelFormat::Invalid
+                                                     ? VideoCore::Surface::PixelFormat::R8_UINT
+                                                     : format).format,
             .offset = offset,
             .range = size,
         }),
@@ -384,6 +387,9 @@ StagingBufferRef BufferCacheRuntime::DownloadStagingBuffer(size_t size, bool def
 }
 
 VkFormat BufferCacheRuntime::TexelBufferFormat(VideoCore::Surface::PixelFormat format) const {
+    if (format == VideoCore::Surface::PixelFormat::Invalid) {
+        return VK_FORMAT_R8_UINT;
+    }
     return MaxwellToVK::SurfaceFormat(device, FormatType::Buffer, false, format).format;
 }
 
